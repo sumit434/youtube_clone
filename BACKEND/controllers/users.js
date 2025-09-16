@@ -7,7 +7,6 @@ export const getUsers = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, count: users.length, data: users });
 });
 
-
 export const getUser = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.params.id).select("-password");
   if (!user) return next(new ErrorResponse(`No user with id ${req.params.id}`, 404));

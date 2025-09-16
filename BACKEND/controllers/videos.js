@@ -18,12 +18,13 @@ res.set('Cache-Control', 'no-store');
   }
   res.status(200).json({ success: true, count: videos.length, data: videos });
 });
+
 // @desc      Get single video
 // @route     GET /api/v1/videos/:id
 // @access    Public
 export const getVideoById = asyncHandler(async (req, res, next) => {
 
-  const video = await Video.findById(req.params.id).populate('channel', 'channelName photoUrl');
+  const video = await Video.findById(req.params.id).populate('channel', 'channelName photoUrl');
 
   console.log("Fetched video:", video);
 
@@ -38,44 +39,19 @@ export const getVideoById = asyncHandler(async (req, res, next) => {
 // @route     POST /api/v1/videos
 // @access    Private
 export const uploadVideo = asyncHandler(async (req, res, next) => {
-  // 1. Check if the user has a channel
+
   if (!req.user.channelId) {
     return next(
       new ErrorResponse("Please create a channel before uploading a video", 400)
     );
   }
   
-  // 2. Since the middleware only gave us the channelId, we have to manually
-  //    find the full channel object and assign it to the body.
-  //    This step is inefficient but will solve the problem.
   req.body.channel = req.user.channelId;
-  
-  // 3. Create the video
   const video = await Video.create(req.body);
 
   res.status(201).json({ success: true, data: video });
 });
 
-
-// export const uploadVideo = asyncHandler(async (req, res, next) => {
-//     // Log to verify the data from the middleware
-//     console.log("Channel from authenticated user:", req.user.channel);
-
-//     // Check if the user has a channel before proceeding
-//     if (!req.user.channel) {
-//         return next(new ErrorResponse("Please create a channel before uploading a video", 400));
-//     }
-
-//     // Correctly set the 'channel' field on the request body
-//     // The value from req.user.channel should be an ObjectId
-//     req.body.channel = req.user.channel;
-
-//     // Remove the redundant 'channelId' from the request body as it's not needed by the model
-//     delete req.body.channelId;
-
-//     const video = await Video.create(req.body);
-//     res.status(201).json({ success: true, data: video });
-// });
 
 // @desc      Update a video
 // @route     PUT /api/v1/videos/:id
@@ -124,4 +100,5 @@ export const deleteVideo = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({ success: true, data: {} });
 });
+
 

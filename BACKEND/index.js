@@ -9,7 +9,7 @@ import DBConnection from "./config/db.js";
 import userRoutes from "./routes/users.js";
 
 
-dotenv.config({ path: path.resolve("./BACKEND/config/.env") });
+dotenv.config({ path: "./config/.env" });  
 
 const app = express();
 

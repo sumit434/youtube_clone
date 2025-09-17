@@ -1,3 +1,5 @@
+
+
 import User from "../models/User.js";
 import asyncHandler from "../middleware/async.js";
 import ErrorResponse from "../utils/errorResponse.js";
@@ -39,7 +41,6 @@ export const login = asyncHandler(async (req, res, next) => {
 
   sendTokenResponse(user, 200, res);
 });
-
 
 export const getMe = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id);

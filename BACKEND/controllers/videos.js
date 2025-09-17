@@ -1,7 +1,7 @@
 import asyncHandler from "../middleware/async.js";
 import ErrorResponse from "../utils/errorResponse.js";
 import Video from "../models/Video.js";
-import Channel from "../models/Channels.js"
+
 
 // @desc      Get all videos
 // @route     GET /api/v1/videos

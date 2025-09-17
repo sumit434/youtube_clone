@@ -1,5 +1,3 @@
-// File: BACKEND/models/Video.js
-
 import mongoose from 'mongoose';
 
 const VideoSchema = new mongoose.Schema({
@@ -20,7 +18,7 @@ const VideoSchema = new mongoose.Schema({
     required: [true, 'Please provide a thumbnail URL'],
   },
   channelId: {
-    type: String, // Storing the channel ID as a simple string
+    type: String,
     required: true,
   },
   status: {
@@ -59,7 +57,7 @@ const VideoSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: "Channel",
     required: true,
-  },
+  }
 });
 
 export default mongoose.model('Video', VideoSchema);

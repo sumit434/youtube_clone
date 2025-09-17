@@ -27,11 +27,6 @@ const UserSchema = new mongoose.Schema({
     minlength: 6,
     select: false, 
   },
-  channelId: {
-    type: mongoose.Schema.ObjectId,
-    ref: "Channel",
-    default: null, 
-  },
   createdAt: {
     type: Date,
     default: Date.now,

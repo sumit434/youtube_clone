@@ -17,11 +17,11 @@ const ChannelSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: "User",
       required: true,
-      unique: true, 
+      unique: true, // one channel per user
     },
     photoUrl: {
       type: String,
-      default: "default-channel.png", 
+      default: "default-channel.png", // fallback channel photo
     },
     bannerUrl: {
       type: String,

@@ -14,6 +14,7 @@ export const getUser = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: user });
 });
 
+
 export const updateUser = asyncHandler(async (req, res, next) => {
   if (req.body.password) delete req.body.password;
 

@@ -51,22 +51,20 @@ export const uploadVideo = asyncHandler(async (req, res, next) => {
 // @route     PUT /api/v1/videos/:id
 // @access    Private
 export const updateVideo = asyncHandler(async (req, res, next) => {
-  let video = await Video.findById(req.params.id);
 
-  if (!video) {
-    return next(new ErrorResponse("Video not found", 404));
-  }
-  if (!req.user.channel || !req.user.channelId) {
-    return next(new ErrorResponse("Not authorized to update this video", 401));
-  }
+   let video = await Video.findById(req.params.id);
+
+   if (!video) {
+   return next(new ErrorResponse("Video not found", 404));
+   }
   if (video.channel.toString() !== req.user.channelId.toString()) {
     return next(new ErrorResponse("Not authorized to update this video", 401));
-  }
-  video = await Video.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-  res.status(200).json({ success: true, data: video });
+   }
+   video = await Video.findByIdAndUpdate(req.params.id, req.body, {
+     new: true, 
+    runValidators: true, 
+   });
+   res.status(200).json({ success: true, data: video });
 });
 
 // @desc      Delete a video

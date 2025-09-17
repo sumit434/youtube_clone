@@ -2,9 +2,7 @@ import express from "express";
 import {
   getCategories,
   getCategory,
-  createCategory,
-  updateCategory,
-  deleteCategory,
+  createCategory
 } from "../controllers/categories.js";
 
 import { protect } from "../middleware/auth.js";

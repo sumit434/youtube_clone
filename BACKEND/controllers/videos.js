@@ -47,6 +47,9 @@ export const uploadVideo = asyncHandler(async (req, res, next) => {
   res.status(201).json({ success: true, data: video });
 });
 
+// @desc      Update a video
+// @route     PUT /api/v1/videos/:id
+// @access    Private
 export const updateVideo = asyncHandler(async (req, res, next) => {
   let video = await Video.findById(req.params.id);
 
@@ -66,6 +69,9 @@ export const updateVideo = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: video });
 });
 
+// @desc      Delete a video
+// @route     DELETE /api/v1/videos/:id
+// @access    Private
 export const deleteVideo = asyncHandler(async (req, res, next) => {
   const video = await Video.findById(req.params.id);
 
@@ -84,7 +90,10 @@ export const deleteVideo = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: {} });
 });
 
-export const OnSearch = async (req, res, next) => {
+// @desc      Increase view count
+// @route     PUT /api/v1/videos/:id/view
+// @access    Public
+export const OnSearch =asyncHandler (async (req, res, next) => {
   try {
     const { query } = req.query;
 
@@ -116,7 +125,7 @@ export const OnSearch = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
+});
 
 // @desc      Get all videos for a specific channel
 // @route     GET /api/v1/videos/:channelId/videos
@@ -141,7 +150,10 @@ export const getChannelVideos = asyncHandler(async (req, res, next) => {
   });
 });
 
-export const getVideosByCategory = async (req, res, next) => {
+// @desc      Get videos by category
+// @route     GET /api/v1/videos/category?category=caategories
+// @access    Public
+export const getVideosByCategory = asyncHandler(async (req, res, next) => {
   try {
     const { category } = req.query;
 
@@ -162,4 +174,4 @@ export const getVideosByCategory = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
+});

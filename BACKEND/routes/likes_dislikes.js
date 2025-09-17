@@ -10,5 +10,4 @@ router.post("/:videoId", protect, reactToVideo);
 
 router.get("/:videoId/reaction", protect, getReaction);
 
-router.get("/:videoId/counts", getReactionCounts);
 export default router;

@@ -3,6 +3,9 @@ import User from "../models/User.js";
 import asyncHandler from "../middleware/async.js";
 import ErrorResponse from "../utils/errorResponse.js";
 
+// @desc      Create new channel
+// @route     POST /api/v1/channels
+// @access    Private
 export const createChannel = asyncHandler(async (req, res, next) => {
   const userId = req.user.id;
 
@@ -15,6 +18,10 @@ export const createChannel = asyncHandler(async (req, res, next) => {
   res.status(201).json({ success: true, channel });
 })
 
+// ... (rest of the controller functions)
+// @desc    Get a channel by ID
+// @route   GET /api/v1/channels/:id
+// @access  Public
 export const getChannel = asyncHandler(async (req, res, next) => {
   const channel = await Channel.findById(req.params.id).populate(
     "userId",
@@ -26,6 +33,9 @@ export const getChannel = asyncHandler(async (req, res, next) => {
   res.status(200).json({ success: true, data: channel });
 });
 
+// @desc    Update channel
+// @route   PUT /api/v1/channels/:id
+// @access  Private
 export const updateChannel = asyncHandler(async (req, res, next) => {
   let channel = await Channel.findById(req.params.id);
 
@@ -53,6 +63,9 @@ export const updateChannel = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Delete channel
+// @route   DELETE /api/v1/channels/:id
+// @access  Private
 export const deleteChannel = asyncHandler(async (req, res, next) => {
   const channel = await Channel.findById(req.params.id);
 

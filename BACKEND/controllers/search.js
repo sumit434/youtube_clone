@@ -2,10 +2,11 @@ import asyncHandler from "../middleware/async.js";
 import Video from "../models/Video.js";
 import User from "../models/User.js";
 
-
+// @desc    Search for users (channels)
+// @route   GET /api/v1/search/users?text=xyz
+// @access  Public
 export const searchUsers = asyncHandler(async (req, res, next) => {
   const text = req.query.text || ""; 
-
   let channels = await User.find({
     $or: [
       { channelName: { $regex: text, $options: "i" } },
@@ -20,6 +21,9 @@ export const searchUsers = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Search for videos
+// @route   GET /api/v1/search/videos?text=xyz
+// @access  Public
 export const searchVideos = asyncHandler(async (req, res, next) => {
   const text = req.query.text || ""; 
 

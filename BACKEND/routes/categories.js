@@ -19,7 +19,5 @@ router
 router
   .route("/:id")
   .get(getCategory)
-  .put(protect, updateCategory)
-  .delete(protect, deleteCategory);
-
+  
 export default router;

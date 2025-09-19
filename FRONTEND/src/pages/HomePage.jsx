@@ -1,32 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import axios from "axios";
 import VideoCard from "../components/VideoCard";
+
+const api = axios.create({
+  baseURL: "http://localhost:8000/api/v1",
+});
 
 export default function HomePage() {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [searchParams] = useSearchParams();
   const query = searchParams.get("query") || "";
 
   useEffect(() => {
     const fetchVideos = async () => {
       setLoading(true);
+      setError(null);
       try {
-        let url = "http://localhost:8000/api/v1/videos"; // default
+        let res;
         if (query) {
-          url = `http://localhost:8000/api/v1/search/videos?text=${query}`;
-        }
-
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (data.success) {
-          setVideos(data.data || []);
+        
+          res = await api.get(`/search/videos?text=${query}`);
         } else {
-          setVideos([]);
+          res = await api.get("/videos");
         }
+        setVideos(res.data.data || []);
       } catch (err) {
         console.error("Error fetching videos:", err);
+        setError("Failed to load videos. Please try again.");
         setVideos([]);
       } finally {
         setLoading(false);
@@ -36,16 +39,19 @@ export default function HomePage() {
     fetchVideos();
   }, [query]);
 
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (loading) {
+    return <p className="text-center mt-10">Loading...</p>;
+  }
 
+  if (error) {
+    return <p className="text-center mt-10 text-red-500">{error}</p>;
+  }
   return (
     <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {videos.length > 0 ? (
         videos.map((video) => <VideoCard key={video._id} video={video} />)
       ) : (
-        <p className="col-span-full text-center text-gray-500">
-          No videos found
-        </p>
+        <p className="col-span-full text-center text-gray-500">No videos found</p>
       )}
     </div>
   );

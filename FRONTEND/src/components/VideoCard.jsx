@@ -7,10 +7,15 @@ export default function VideoCard({ video }) {
       <Link to={`/videos/${video._id}`}>
         <div className="rounded-lg overflow-hidden shadow hover:shadow-lg transition">
           <img
-            src={video.thumbnail?.url || "https://via.placeholder.com/300x200"}
-            alt={video.title}
-            className="w-full h-40 object-cover"
-          />
+  src={
+    typeof video.thumbnail === "string"
+      ? video.thumbnail
+      : video.thumbnail?.url || "https://via.placeholder.com/300x200"
+  }
+  alt={video.title}
+  className="w-full h-40 object-cover"
+/>
+
         </div>
         <div className="mt-2">
           <h3 className="text-sm font-semibold line-clamp-2">{video.title}</h3>

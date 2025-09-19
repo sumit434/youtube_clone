@@ -1,18 +1,30 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Search } from "lucide-react";
 
 export default function Navbar() {
-  const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("query") || "");
 
+  const handleInputChange = (e) => {
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+
+    if (newQuery) {
+      setSearchParams({ query: newQuery });
+    } else {
+      setSearchParams({});
+    }
+  };
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      navigate(`/search?query=${encodeURIComponent(query)}`);
+      navigate(`/?query=${encodeURIComponent(query)}`);
+    } else {
+      navigate("/");
     }
   };
-
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between px-4 py-2 bg-white shadow">
       {/* Logo */}
@@ -28,7 +40,7 @@ export default function Navbar() {
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={handleInputChange}
           placeholder="Search"
           className="w-full border rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
         />

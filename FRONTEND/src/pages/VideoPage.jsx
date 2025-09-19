@@ -22,13 +22,13 @@ useEffect(() => {
         const relatedRes = await api.get(`/videos/${videoData.channelId}/videos`);
         const filteredRelated = (relatedRes.data?.data || []).filter(v => v._id !== videoData._id);
 
-        const mappedRelated = filteredRelated.map(video => ({
-          videoId: video._id,
-          title: video.title,
-          thumbnailUrl: video.thumbnail,
-          channelName: video.channel?.channelName || "Unknown",
-          views: video.views?.toLocaleString() || 0
-        }));
+      const mappedRelated = filteredRelated.map(video => ({
+      _id: video._id,  
+      title: video.title,
+      thumbnail: video.thumbnail, 
+      channel: video.channel,     
+      views: video.views || 0
+    }));
 
         setRelatedVideos(mappedRelated);
       }
@@ -45,16 +45,19 @@ useEffect(() => {
 }, [id]);
 
   const handleVideoCardClick = (videoId) => {
-    navigate(`/videos/${videoId}`);
-  };
+  navigate(`/videos/${videoId}`);
+};
+
 if (loading) {
-  return <p>Loading...</p>;
+  return <div className="p-4 text-gray-600">Loading video...</div>;
 }
+
 
 if (!currentVideo) {
   return <p>Video not found. Please check your back-end data.</p>;
 }
-
+// ✅ Add this line to see the data you're working with
+console.log("Related Videos Data:", relatedVideos); 
 return (
   <div className="p-4 flex flex-col lg:flex-row gap-6">
     <div className="flex-1">
@@ -83,22 +86,21 @@ return (
       </p>
     </div>
 
-    <div className="w-full lg:w-80">
-      <h2 className="text-lg font-bold mb-3">Related Videos</h2>
-      <div className="flex flex-col gap-4">
-        {relatedVideos.length > 0 ? (
-          relatedVideos.map((video) => (
-            <VideoCard
-              key={video._id}
-              video={video}
-              onClick={() => handleVideoCardClick(video._id)}
-            />
-          ))
-        ) : (
-          <p className="text-sm text-gray-500">No related videos found.</p>
-        )}
-      </div>
-    </div>
+   <div className="w-full lg:w-80">
+  <h2 className="text-lg font-bold mb-3">Related Videos</h2>
+  <div className="flex flex-col gap-4">
+    {relatedVideos.length > 0 ? (
+      relatedVideos.map((video) => (
+        <VideoCard
+          key={video._id}
+          video={video}
+        />
+      ))
+    ) : (
+      <p className="text-sm text-gray-500">No related videos found.</p>
+    )}
+  </div>
+</div>
   </div>
 );
 

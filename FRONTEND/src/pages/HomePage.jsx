@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import axios from "axios";
+import api from "../utils/axios";
 import VideoCard from "../components/VideoCard";
-
-const api = axios.create({
-  baseURL: "http://localhost:8000/api/v1",
-});
 
 export default function HomePage() {
   const [videos, setVideos] = useState([]);
@@ -21,7 +17,6 @@ export default function HomePage() {
       try {
         let res;
         if (query) {
-        
           res = await api.get(`/search/videos?text=${query}`);
         } else {
           res = await api.get("/videos");
@@ -46,6 +41,7 @@ export default function HomePage() {
   if (error) {
     return <p className="text-center mt-10 text-red-500">{error}</p>;
   }
+
   return (
     <div className="p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {videos.length > 0 ? (

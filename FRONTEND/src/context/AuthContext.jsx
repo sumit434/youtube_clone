@@ -4,62 +4,100 @@ import api from "../utils/axios.js";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const setAuthToken = (token) => {
-    if (token) {
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      localStorage.setItem("token", token);
-    } else {
-      delete api.defaults.headers.common["Authorization"];
-      localStorage.removeItem("token");
-    }
-  };
+  const setAuthToken = (token) => {
+    if (token) {
+      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      localStorage.setItem("token", token);
+    } else {
+      delete api.defaults.headers.common["Authorization"];
+      localStorage.removeItem("token");
+    }
+  };
 
-  const loadUser = async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      setAuthToken(token);
-      try {
-        const res = await api.get("/auth/me"); 
-        setUser(res.data.user);
-      } catch {
-        setAuthToken(null);
-        setUser(null);
-      }
-    }
-    setLoading(false);
-  };
+  // Helper to safely generate avatar if missing
+  const generateAvatar = (username) =>
+    `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
+      username
+    )}`;
 
-  useEffect(() => {
-    loadUser();
-  }, []);
+  const loadUser = async () => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setAuthToken(token);
+      try {
+        const res = await api.get("/auth/me");
+        const userData = res.data.user;
+        if (userData && !userData.avatar) {
+          // ✅ FIX: Create a new user object to ensure state update
+          setUser({
+            ...userData,
+            avatar: generateAvatar(userData.username || userData.name),
+          });
+        } else {
+          setUser(userData || null);
+        }
+      } catch {
+        setAuthToken(null);
+        setUser(null);
+      }
+    }
+    setLoading(false);
+  };
 
-  const signup = async (name, username, email, password) => {
-    const res = await api.post("/auth/register", { name, username, email, password });
-    setAuthToken(res.data.token);
-    setUser(res.data.user);
-    return res.data;
-  };
+  useEffect(() => {
+    loadUser();
+  }, []);
 
-  const login = async (email, password) => {
-    const res = await api.post("/auth/login", { email, password });
-    setAuthToken(res.data.token);
-    setUser(res.data.user);
-    return res.data;
-  };
+  const signup = async (name, username, email, password) => {
+    const res = await api.post("/auth/register", {
+      name,
+      username,
+      email,
+      password,
+    });
+    setAuthToken(res.data.token);
+    const userData = res.data.user;
+    if (userData && !userData.avatar) {
+      // ✅ FIX: Create a new user object
+      setUser({
+        ...userData,
+        avatar: generateAvatar(userData.username || userData.name),
+      });
+    } else {
+      setUser(userData);
+    }
+    return res.data;
+  };
 
-  const logout = () => {
-    setUser(null);
-    setAuthToken(null);
-  };
+  const login = async (email, password) => {
+    const res = await api.post("/auth/login", { email, password });
+    setAuthToken(res.data.token);
+    const userData = res.data.user;
+    if (userData && !userData.avatar) {
+      // ✅ FIX: Create a new user object
+      setUser({
+        ...userData,
+        avatar: generateAvatar(userData.username || userData.name),
+      });
+    } else {
+      setUser(userData);
+    }
+    return res.data;
+  };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, signup, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  const logout = () => {
+    setUser(null);
+    setAuthToken(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, signup, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => useContext(AuthContext);

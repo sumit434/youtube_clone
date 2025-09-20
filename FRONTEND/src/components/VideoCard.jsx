@@ -16,7 +16,7 @@ function VideoCard({ video }) {
   return (
     <Link
       to={`/videos/${video._id}`}
-      className="block rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
+      className="block rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
     >
       <img
         src={thumbnailUrl}

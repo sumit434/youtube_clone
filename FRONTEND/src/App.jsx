@@ -9,8 +9,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/signup" element={<SignUpPage />} />
         <Route path="/" element={<MainLayout />}>
           <Route index element={<HomePage />} />
+          
           <Route path="channel">
           </Route>
           <Route path="/videos/:id" element={<VideoPage />} /> 

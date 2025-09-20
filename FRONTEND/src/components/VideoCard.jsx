@@ -1,29 +1,39 @@
-import React from "react";
 import { Link } from "react-router-dom";
 
-export default function VideoCard({ video }) {
-  return (
-    <div className="w-full sm:w-60 p-2">
-      <Link to={`/videos/${video._id}`}>
-        <div className="rounded-lg overflow-hidden shadow hover:shadow-lg transition">
-          <img
-  src={
+function VideoCard({ video }) {
+
+  const formatViews = (views) => {
+    if (!views && views !== 0) return "0 views";
+    if (views >= 1_000_000) return (views / 1_000_000).toFixed(1) + "M views";
+    if (views >= 1_000) return (views / 1_000).toFixed(0) + "K views";
+    return views + " views";
+  };
+  const thumbnailUrl =
     typeof video.thumbnail === "string"
       ? video.thumbnail
-      : video.thumbnail?.url || "https://via.placeholder.com/300x200"
-  }
-  alt={video.title}
-  className="w-full h-40 object-cover"
-/>
+      : video.thumbnail?.url || "https://via.placeholder.com/300x200";
 
-        </div>
-        <div className="mt-2">
-          <h3 className="text-sm font-semibold line-clamp-2">{video.title}</h3>
-          <p className="text-xs text-gray-500">
-            {video.channel?.channelName || "Unknown Channel"}
-          </p>
-        </div>
-      </Link>
-    </div>
+  return (
+    <Link
+      to={`/videos/${video._id}`}
+      className="block rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
+    >
+      <img
+        src={thumbnailUrl}
+        alt={video.title}
+        className="w-full h-48 object-cover rounded-t-lg"
+      />
+      <div className="p-3">
+        <h3 className="text-sm font-semibold mb-1 line-clamp-2">
+          {video.title}
+        </h3>
+        <p className="text-xs text-gray-500">
+          {video.channel?.channelName || "Unknown Channel"}
+        </p>
+        <p className="text-xs text-gray-500">{formatViews(video.views)}</p>
+      </div>
+    </Link>
   );
 }
+
+export default VideoCard;

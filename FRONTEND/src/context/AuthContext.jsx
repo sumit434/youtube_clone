@@ -17,13 +17,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const generateAvatar = (username) =>
+    `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
+      username
+    )}`;
+
   const loadUser = async () => {
     const token = localStorage.getItem("token");
     if (token) {
       setAuthToken(token);
       try {
-        const res = await api.get("/auth/me"); 
-        setUser(res.data.user);
+        const res = await api.get("/auth/me");
+        const userData = res.data.user;
+        if (userData && !userData.avatar) {
+
+          setUser({
+            ...userData,
+            avatar: generateAvatar(userData.username || userData.name),
+          });
+        } else {
+          setUser(userData || null);
+        }
       } catch {
         setAuthToken(null);
         setUser(null);
@@ -37,16 +51,39 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signup = async (name, username, email, password) => {
-    const res = await api.post("/auth/register", { name, username, email, password });
+    const res = await api.post("/auth/register", {
+      name,
+      username,
+      email,
+      password,
+    });
     setAuthToken(res.data.token);
-    setUser(res.data.user);
+    const userData = res.data.user;
+    if (userData && !userData.avatar) {
+ 
+      setUser({
+        ...userData,
+        avatar: generateAvatar(userData.username || userData.name),
+      });
+    } else {
+      setUser(userData);
+    }
     return res.data;
   };
 
   const login = async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
     setAuthToken(res.data.token);
-    setUser(res.data.user);
+    const userData = res.data.user;
+    if (userData && !userData.avatar) {
+
+      setUser({
+        ...userData,
+        avatar: generateAvatar(userData.username || userData.name),
+      });
+    } else {
+      setUser(userData);
+    }
     return res.data;
   };
 

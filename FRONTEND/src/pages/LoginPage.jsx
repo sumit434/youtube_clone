@@ -7,8 +7,9 @@ export default function LoginPage () {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [alert, setAlert] = useState(null);
   const navigate = useNavigate();
-  const { login } = useAuth();
+   const { user, login } = useAuth();
 
+   
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };

@@ -1,27 +1,84 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Search, Menu } from "lucide-react";
+import { Search, Menu, Video, ChevronDown, User, LogOut, Settings } from "lucide-react"; 
 import { useAuth } from "../context/AuthContext";
 
 export default function Navbar({ onToggle }) {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth(); 
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("query") || "");
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [hasChannel, setHasChannel] = useState(false); 
 
-  // Handle search input change
+  useEffect(() => {
+    const urlQuery = searchParams.get("query") || "";
+    if (query !== urlQuery) {
+      setQuery(urlQuery);
+    }
+  }, [searchParams, query]);
+
+  useEffect(() => {
+    if (user && user.channelId) {
+      setHasChannel(true);
+    } else if (user) {
+      const fetchUserData = async () => {
+        try {
+          const response = await fetch("http://localhost:8000/api/v1/auth/me", {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success && data.user && data.user.channelId) {
+              updateUser({ channelId: data.user.channelId });
+              setHasChannel(true);
+            } else {
+              setHasChannel(false);
+            }
+          } else if (response.status === 404) {
+            setHasChannel(false);
+          } else {
+            console.error(`Failed to fetch user data: ${response.statusText}`);
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+      fetchUserData();
+    }
+  }, [user, updateUser]);
+
   const handleInputChange = (e) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
-    if (newQuery) setSearchParams({ query: newQuery });
-    else setSearchParams({});
+    if (newQuery) {
+      setSearchParams({ query: newQuery });
+    } else {
+      setSearchParams({});
+    }
   };
 
-  // Handle search submit
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) navigate(`/?query=${encodeURIComponent(query)}`);
     else navigate("/");
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    setDropdownOpen(false);
+  };
+
+  const handleProfileClick = () => {
+    if (user?.channelId) {
+      navigate(`/channel/${user.channelId}`);
+    } else {
+      navigate("/channel/create");
+    }
+    setDropdownOpen(false);
   };
 
   return (
@@ -35,7 +92,7 @@ export default function Navbar({ onToggle }) {
         >
           <Menu size={28} />
         </button>
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex ml-5 items-center gap-2">
           <svg
             viewBox="0 0 576 512"
             xmlns="http://www.w3.org/2000/svg"
@@ -68,24 +125,130 @@ export default function Navbar({ onToggle }) {
         </button>
       </form>
 
-      {/* Right side: Sign In / User */}
-      <div>
+      {/* Right side: User Actions */}
+      <div className="flex items-center gap-4">
         {user ? (
-          <div className="flex items-center gap-2">
-            {user.avatar && (
-              <img 
-                src={user.avatar} 
-                alt="User Avatar" 
-                className="w-8 h-8 rounded-full" 
-              />
+          <>
+            {hasChannel ? (
+              <button
+                onClick={() => navigate("/studio/upload")}
+                className="p-2 rounded-full hover:bg-gray-100"
+              >
+                <Video size={22} />
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate("/create-channel")}
+                className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+              >
+                Create Channel
+              </button>
             )}
-            <button
-              onClick={logout}
-              className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-            >
-              Logout
-            </button>
-          </div>
+
+            {/* Avatar + Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setDropdownOpen((prev) => !prev)}
+                className="flex items-center gap-1"
+              >
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="User Avatar"
+                    className="w-8 h-8 rounded-full"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm">
+                    {user.username?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </button>
+
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white z-50">
+                  <div className="flex items-center p-4 border-b border-gray-200">
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt="User Avatar"
+                        className="w-10 h-10 rounded-full mr-3"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                        <User size={24} />
+                      </div>
+                    )}
+                    <div>
+                      <div className="text-sm font-semibold text-gray-900">
+                        {user.name}
+                      </div>
+                      <div className="text-sm text-gray-500">{user.email}</div>
+                    </div>
+                  </div>
+
+                  <div
+                    className="py-1"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="options-menu"
+                  >
+                    <button
+                      onClick={handleProfileClick}
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                    >
+                      <User size={18} className="mr-3" />
+                      My Channel
+                    </button>
+                    <Link
+                      to="#"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
+                      role="menuitem"
+                    >
+                      YouTube Studio
+                    </Link>
+                    <Link
+                      to="#"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
+                      role="menuitem"
+                    >
+                      Purchases and Membership
+                    </Link>
+                    <Link
+                      to="#"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
+                      role="menuitem"
+                    >
+                      Language
+                    </Link>
+                    <Link
+                      to="#"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
+                      role="menuitem"
+                    >
+                      Location
+                    </Link>
+                    <Link
+                      to="#"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
+                      role="menuitem"
+                    >
+                      <Settings size={18} className="mr-3" />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                    >
+                      <LogOut size={18} className="mr-3" />
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
         ) : (
           <button
             onClick={() => navigate("/login")}

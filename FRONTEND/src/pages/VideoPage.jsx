@@ -1,16 +1,14 @@
 import { useState, useEffect } from "react";
-
 import { useParams } from "react-router-dom";
 import VideoCard from "../components/VideoCard.jsx";
 import api from "../utils/axios.js";
 
 export default function VideoPage() {
   const { id } = useParams();
-
   const [currentVideo, setCurrentVideo] = useState(null);
   const [relatedVideos, setRelatedVideos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [subscriberCount, setSubscriberCount] = useState(null);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
     const fetchVideoAndRelated = async () => {
@@ -33,7 +31,6 @@ export default function VideoPage() {
           }));
           setRelatedVideos(mappedRelated);
 
-          setSubscriberCount(videoData.channel?.subscribers || null);
         } else {
           setRelatedVideos([]);
         }
@@ -50,12 +47,15 @@ export default function VideoPage() {
     fetchVideoAndRelated();
   }, [id]);
 
-  const handleReaction = (type) => {
-    console.log(`User clicked ${type}`);
+  const handleSubscribeToggle = () => {
+    setIsSubscribed(!isSubscribed);
   };
-
   if (loading) return <div className="p-4 text-gray-600">Loading video...</div>;
   if (!currentVideo) return <p className="p-4 text-red-500">Video not found.</p>;
+
+  const subscribeButtonClasses = isSubscribed
+    ? "bg-gray-400 text-gray-800"
+    : "bg-red-600 text-white";
 
   return (
   <div className="p-4 flex flex-col lg:flex-row gap-6">
@@ -79,7 +79,7 @@ export default function VideoPage() {
         </p>
       </div>
 
-      <div className="mt-4 p-4 bg-white rounded-lg shadow-sm">
+      <div className="mt-4 p-4 rounded-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold text-sm text-white">
@@ -91,10 +91,12 @@ export default function VideoPage() {
                 {(currentVideo.channel?.subscribers || 0).toLocaleString()} subscribers
               </p>
             </div>
-            {/* The Subscribe Button */}
-            <button className="bg-red-600 text-white font-semibold py-2 px-4 rounded-full hover:bg-red-700 transition-colors">
-              Subscribe
-            </button>
+            <button
+                className={`font-semibold py-2 px-4 rounded-full transition-colors ${subscribeButtonClasses}`}
+                onClick={handleSubscribeToggle}
+              >
+                {isSubscribed ? "Subscribed" : "Subscribe"}
+              </button>
           </div>
         </div>
 

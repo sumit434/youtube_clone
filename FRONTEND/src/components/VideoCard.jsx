@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 
 function VideoCard({ video }) {
+  console.log("Data received by VideoCard:", video); 
 
   const formatViews = (views) => {
     if (!views && views !== 0) return "0 views";
@@ -8,6 +9,7 @@ function VideoCard({ video }) {
     if (views >= 1_000) return (views / 1_000).toFixed(0) + "K views";
     return views + " views";
   };
+
   const thumbnailUrl =
     typeof video.thumbnail === "string"
       ? video.thumbnail
@@ -16,10 +18,10 @@ function VideoCard({ video }) {
   return (
     <Link
       to={`/videos/${video._id}`}
-      className="block rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow"
+      className="block rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
     >
       <img
-        src={thumbnailUrl}
+        src={thumbnailUrl} 
         alt={video.title}
         className="w-full h-48 object-cover rounded-t-lg"
       />

@@ -7,6 +7,7 @@ import {
 } from "react-icons/ai";
 import { useParams } from "react-router-dom";
 import VideoCard from "../components/VideoCard.jsx";
+import Comment from "../components/Comment.jsx"; 
 import api from "../utils/axios.js";
 import { useAuth } from "../context/AuthContext.jsx";
 
@@ -22,6 +23,9 @@ export default function VideoPage() {
   const [likesCount, setLikesCount] = useState(0);
   const [dislikesCount, setDislikesCount] = useState(0);
   const [userReaction, setUserReaction] = useState(null);
+
+  const [comments, setComments] = useState([]);
+  const [newCommentText, setNewCommentText] = useState("");
 
   useEffect(() => {
     const fetchVideoAndRelated = async () => {
@@ -67,27 +71,40 @@ export default function VideoPage() {
     fetchVideoAndRelated();
   }, [id, user]);
 
- 
   const handleReaction = async (type) => {
-  if (!user) {
-    alert("Please log in to react to videos.");
-    return;
-  }
+    if (!user) {
+      alert("Please log in to react to videos.");
+      return;
+    }
 
-  try {
-    await api.post(`/likes_dislikes/${currentVideo._id}`, { type });
+    try {
+      await api.post(`/likes_dislikes/${currentVideo._id}`, { type });
+      const countsRes = await api.get(`/likes_dislikes/${currentVideo._id}/counts`);
+      setLikesCount(countsRes.data?.data?.likes || 0);
+      setDislikesCount(countsRes.data?.data?.dislikes || 0);
+      const userReactionRes = await api.get(`/likes_dislikes/${currentVideo._id}`);
+      setUserReaction(userReactionRes.data?.data || null);
+    } catch (error) {
+      console.error("Error updating reaction:", error);
+    }
+  };
+const handleCommentSubmit = (e) => {
+  e.preventDefault();
+  if (newCommentText.trim() === "") return;
 
-    const countsRes = await api.get(`/likes_dislikes/${currentVideo._id}/counts`);
-    setLikesCount(countsRes.data?.data?.likes || 0);
-    setDislikesCount(countsRes.data?.data?.dislikes || 0);
+  const newComment = {
+    _id: Date.now().toString(), 
+    text: newCommentText,
+    author: {
+      username: user?.username || "You",
+      _id: user?._id || "local",
+    },
+  };
 
-    const userReactionRes = await api.get(`/likes_dislikes/${currentVideo._id}`);
-    setUserReaction(userReactionRes.data?.data || null);
-  } catch (error) {
-    console.error("Error updating reaction:", error);
-
-  }
+  setComments([newComment, ...comments]); 
+  setNewCommentText(""); 
 };
+
   if (loading) return <div className="p-4 text-gray-600">Loading video...</div>;
   if (!currentVideo) return <p className="p-4 text-red-500">Video not found.</p>;
 
@@ -104,8 +121,6 @@ export default function VideoPage() {
             title={currentVideo.title}
           ></video>
         </div>
-
-        {/* Title and Views */}
         <div className="mt-4">
           <h1 className="text-lg sm:text-xl font-bold">{currentVideo.title}</h1>
           <p className="text-sm text-gray-600 mt-1">
@@ -168,8 +183,38 @@ export default function VideoPage() {
             <p>{currentVideo.description}</p>
           </div>
         </div>
-      </div>
+        <div className="mt-6 p-4 bg-white rounded-lg shadow-sm">
+          <h2 className="text-lg font-bold mb-4">Comments ({comments.length})</h2>
 
+          {/* Comment input form */}
+          <form onSubmit={handleCommentSubmit} className="flex gap-4 items-center mb-6">
+            <input
+              type="text"
+              value={newCommentText}
+              onChange={(e) => setNewCommentText(e.target.value)}
+              placeholder="Add a comment..."
+              className="flex-1 p-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 text-white font-semibold py-2 px-6 rounded-full hover:bg-blue-700 transition-colors"
+            >
+              Comment
+            </button>
+          </form>
+
+        <div className="flex flex-col">
+        {comments.length > 0 ? (
+          comments.map((comment) => (
+            <Comment key={comment._id} comment={comment} />
+          ))
+        ) : (
+          <p className="text-sm text-gray-500">No comments yet.</p>
+        )}
+      </div>
+     </div>
+    </div>
+    
       {/* Related Videos */}
       <div className="w-full lg:w-80">
         <h2 className="text-lg font-bold mb-3">Related Videos</h2>

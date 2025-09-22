@@ -11,7 +11,7 @@ export default function Navbar({ onToggle }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hasChannel, setHasChannel] = useState(false); 
 
-  useEffect(() => {
+   useEffect(() => {
     const urlQuery = searchParams.get("query") || "";
     if (query !== urlQuery) {
       setQuery(urlQuery);
@@ -24,31 +24,31 @@ export default function Navbar({ onToggle }) {
     } else if (user) {
       const fetchUserData = async () => {
         try {
-          const response = await fetch("http://localhost:8000/api/v1/auth/me", {
+          const response = await api.get("/auth/me", {
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           });
-          if (response.ok) {
-            const data = await response.json();
-            if (data.success && data.user && data.user.channelId) {
-              updateUser({ channelId: data.user.channelId });
-              setHasChannel(true);
-            } else {
-              setHasChannel(false);
-            }
-          } else if (response.status === 404) {
-            setHasChannel(false);
+
+          const data = response.data;
+          if (data.success && data.user && data.user.channelId) {
+            updateUser({ channelId: data.user.channelId });
+            setHasChannel(true);
           } else {
-            console.error(`Failed to fetch user data: ${response.statusText}`);
+            setHasChannel(false);
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          if (error.response?.status === 404) {
+            setHasChannel(false);
+          } else {
+            console.error("Error fetching user data:", error);
+          }
         }
       };
       fetchUserData();
     }
   }, [user, updateUser]);
+
 
   const handleInputChange = (e) => {
     const newQuery = e.target.value;
@@ -82,7 +82,7 @@ export default function Navbar({ onToggle }) {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-4 py-2">
+    <header className="fixed top-0 left-0 w-full z-50 flex items-center bg-neutral-100 justify-between px-4 py-2">
       {/* Left: Hamburger + Logo */}
       <div className="flex items-center gap-2">
         <button

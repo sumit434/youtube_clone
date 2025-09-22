@@ -14,7 +14,7 @@ function Sidebar({ open, onToggle }) {
         open ? "w-60" : "w-20"
       } hidden sm:block overflow-y-auto h-screen sticky top-0 z-40`}
     >
-      <div className="flex items-center p-3 border-b border-gray-200">
+      <div className="flex items-center p-3 border-b bg-neutral-100 border-gray-200">
       
       </div>
 
@@ -26,7 +26,7 @@ function Sidebar({ open, onToggle }) {
 function SidebarLinks({ open }) {
   return (
     <>
-      <nav className="p-2 my-2">
+      <nav className="p-2 mt-6">
         <SidebarItem to="/" icon={<Home size={30} />} label="Home" open={open} />
         <SidebarItem to="/shorts" icon={<PlaySquare size={30} />} label="Shorts" open={open} />
         <SidebarItem to="/subscriptions" icon={<Youtube size={30} />} label="Subscriptions" open={open} />

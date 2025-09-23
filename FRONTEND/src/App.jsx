@@ -5,6 +5,8 @@ import LoginPage from "./pages/LoginPage.jsx";
 import SignUpPage from "./pages/SignupPage.jsx";
 import VideoPage from "./pages/VideoPage.jsx";
 import UserChannelPage from "./pages/UserChannelPage.jsx";
+import ChannelPage from "./pages/ChannelPage.jsx";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -16,7 +18,7 @@ export default function App() {
           <Route index element={<HomePage />} />
           <Route path="videos/:id" element={<VideoPage />} /> 
           <Route path="search" element={<HomePage />} /> 
-          <Route path="channel" element={<h1>Channel Page Coming Soon</h1>} />
+          <Route path="/channel/:id" element={<ChannelPage />} />
         </Route>
 
         <Route path="*" element={<h1>Not Found</h1>} />

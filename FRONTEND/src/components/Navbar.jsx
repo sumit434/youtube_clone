@@ -82,7 +82,7 @@ export default function Navbar({ onToggle }) {
   };
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 flex items-center bg-neutral-100 justify-between px-4 py-2">
+    <header className="fixed top-0 left-0 w-full z-50 flex items-center bg-neutral-100 justify-between px-5 py-2">
       {/* Left: Hamburger + Logo */}
       <div className="flex items-center gap-2">
         <button
@@ -125,20 +125,22 @@ export default function Navbar({ onToggle }) {
         </button>
       </form>
 
-     <div className="flex items-center gap-4">
+     <div className="flex items-center gap-1">
   {user ? (
     <>
       {hasChannel ? (
         <button
-          onClick={() => navigate("/studio/upload")}
-          className="p-2 rounded-full hover:bg-gray-100"
-        >
-          <Video size={22} />
-        </button>
+  onClick={() => navigate("/studio/upload")}
+  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1 rounded-full shadow-md transition"
+>
+  <Video size={20} />
+  <span>Upload</span>
+</button>
+
       ) : (
         <button
           onClick={() => navigate("/channel/create")}
-          className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+          className="bg-blue-600 text-white px-3 py-1 rounded-full font-medium  hover:bg-blue-700 text-sm"
         >
           Create Channel
         </button>
@@ -154,7 +156,7 @@ export default function Navbar({ onToggle }) {
             <img
               src={user.avatar}
               alt="User Avatar"
-              className="w-8 h-8 rounded-full"
+              className="w-10.5 h-10.5 rounded-full"
             />
           ) : (
             <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm">
@@ -240,7 +242,7 @@ export default function Navbar({ onToggle }) {
   ) : (
     <button
       onClick={() => navigate("/login")}
-      className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700"
+      className="bg-red-600 text-white px-3 py-0.5 font-medium rounded-2xl hover:bg-red-800"
     >
       Sign In
     </button>

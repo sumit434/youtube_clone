@@ -15,7 +15,7 @@ export default function MainLayout() {
       <Sidebar open={isSidebarOpen} />
       <div className={`flex-1 overflow-x-hidden transition-all duration-300 ml-0`}>
         <Navbar onToggle={toggleSidebar} />
-        <main className="p-4 pt-16">
+        <main className="p-4 pt-10">
           <Outlet />
         </main>
       </div>

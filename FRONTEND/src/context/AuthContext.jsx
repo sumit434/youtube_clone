@@ -16,12 +16,12 @@ export const AuthProvider = ({ children }) => {
       localStorage.removeItem("token");
     }
   };
-
+// Generate a fallback avatar if user has none
   const generateAvatar = (username) =>
     `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
       username
     )}`;
-
+  // Load user details from backend if token exists
   const loadUser = async () => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     loadUser();
   }, []);
-
+  // Signup new user → save token & add avatar if missing
   const signup = async (name, username, email, password) => {
     const res = await api.post("/auth/register", {
       name,
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
     }
     return res.data;
   };
-
+// Login user → save token & add avatar if missing
   const login = async (email, password) => {
     const res = await api.post("/auth/login", { email, password });
     setAuthToken(res.data.token);
@@ -83,12 +83,12 @@ export const AuthProvider = ({ children }) => {
     }
     return res.data;
   };
-
+// Clear user data and token on logout
   const logout = () => {
     setUser(null);
     setAuthToken(null);
   };
-
+// Update user state with new info (profile edits, etc.)
   const updateUser = (updates) => {
     setUser((prev) => (prev ? { ...prev, ...updates } : prev));
   };

@@ -4,14 +4,15 @@ import api from "../utils/axios";
 import VideoCard from "../components/VideoCard";
 
 export default function HomePage() {
-  const [videos, setVideos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [videos, setVideos] = useState([]); 
+  const [loading, setLoading] = useState(true); 
+  const [error, setError] = useState(null); 
 
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("query") || "";
-  const category = searchParams.get("category") || "";
+  const category = searchParams.get("category") || ""; 
 
+  // Fetch videos whenever query or category changes
   useEffect(() => {
     const fetchVideos = async () => {
       setLoading(true);
@@ -19,10 +20,13 @@ export default function HomePage() {
       try {
         let res;
         if (query) {
+          // Search by query text
           res = await api.get(`/search/videos?text=${query}`);
         } else if (category && category !== "All") {
+          // Filter by category
           res = await api.get(`/videos/category?category=${category}`);
         } else {
+          // Fetch all videos
           res = await api.get("/videos");
         }
         setVideos(res.data.data || []);
@@ -38,24 +42,23 @@ export default function HomePage() {
     fetchVideos();
   }, [query, category]);
 
+  // Handle category filter button clicks
   const handleFilter = (cat) => {
     if (cat === "All") {
-      setSearchParams({});
+      setSearchParams({}); 
     } else {
       setSearchParams({ category: cat });
     }
   };
-
   if (loading) {
     return <p className="text-center mt-10">Loading...</p>;
   }
-
   if (error) {
     return <p className="text-center mt-10 text-red-500">{error}</p>;
   }
 
   return (
-    <div className="p-4">
+    <div className="p-5">
       {/* Filter buttons */}
       <div className="flex gap-2 mb-6 overflow-x-auto scrollbar-hide">
         {["All", "Tech", "Gaming", "Music", "Comedy", "Learning"].map((cat) => (

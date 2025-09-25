@@ -9,30 +9,37 @@ export default function SignUpPage() {
     username: "",
     email: "",
     password: "",
-  });
-  const [alert, setAlert] = useState(null);
+  }); // Store form input values
+  const [alert, setAlert] = useState(null); 
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const { signup } = useAuth(); 
 
+  // Handle input field changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setAlert(null);
+    setAlert(null); 
     try {
-      const response = await signup(formData.name, formData.username, formData.email, formData.password);
-      console.log("Response from signup:", response);
-      
-      if (response && response.data) {
-        navigate("/");
+      const newUser = await signup(
+        formData.name,
+        formData.username,
+        formData.email,
+        formData.password
+      );
+
+      if (newUser) {
+        setAlert("Account created successfully!"); 
+        navigate("/"); 
       } else {
         setAlert("Registration failed. Please try again.");
       }
     } catch (error) {
       console.error("Signup failed:", error);
-      setAlert(error.response?.data?.error || "Registration failed");
+      setAlert(error.response?.data?.error || "Registration failed"); 
     }
   };
 
@@ -40,6 +47,8 @@ export default function SignUpPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Sign Up</h2>
+
+        {/* Signup form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -96,11 +105,13 @@ export default function SignUpPage() {
             Sign Up
           </button>
         </form>
+ {/* Display success or error alert */}
         {alert && (
           <div className="mt-4 p-3 text-sm text-red-700 bg-red-100 rounded-md">
             {alert}
           </div>
         )}
+ {/* Link to login page for existing users */}
         <p className="mt-4 text-center text-sm text-gray-600">
           Already have an account?{" "}
           <Link to="/login" className="text-red-600 hover:underline">

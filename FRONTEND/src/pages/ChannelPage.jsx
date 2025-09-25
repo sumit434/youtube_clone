@@ -6,19 +6,21 @@ import { useAuth } from "../context/AuthContext.jsx";
 
 export default function ChannelPage() {
   const { id } = useParams();
-  const { user } = useAuth();
-  const [loading, setLoading] = useState(true);
-  const [channel, setChannel] = useState(null);
-  const [videos, setVideos] = useState([]);
+  const { user } = useAuth(); 
+  const [loading, setLoading] = useState(true); 
+  const [channel, setChannel] = useState(null); 
+  const [videos, setVideos] = useState([]); 
 
+  // Generate a fallback avatar if no photo exists
   const generateAvatar = (username) =>
     `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
       username
     )}`;
 
+  // Fetch channel + videos data whenever channelId or user changes
   useEffect(() => {
-    let mounted = true;
-    const controller = new AbortController();
+    let mounted = true; 
+    const controller = new AbortController(); 
 
     async function fetchChannelData() {
       try {
@@ -26,7 +28,7 @@ export default function ChannelPage() {
         const channelRes = await api.get(`/channels/${channelIdToFetch}`, {
           signal: controller.signal,
         });
-        
+
         if (!mounted) return;
         const channelData = channelRes.data?.data || channelRes.data || null;
         setChannel(channelData);
@@ -37,11 +39,16 @@ export default function ChannelPage() {
             signal: controller.signal,
           });
         } catch (err) {
+
           if (err.response?.status === 404) {
             videosRes = { data: { data: [] } };
-          } else if (err.name === "CanceledError" || err.code === "ERR_CANCELED") {
+          } 
+      
+          else if (err.name === "CanceledError" || err.code === "ERR_CANCELED") {
             return;
-          } else {
+          } 
+          
+          else {
             throw err;
           }
         }
@@ -52,6 +59,7 @@ export default function ChannelPage() {
         if (err.name !== "AbortError" && err.code !== "ERR_CANCELED") {
           console.error("Failed to fetch channel data:", err);
         }
+        // Reset if error occurs
         setChannel(null);
         setVideos([]);
       } finally {
@@ -63,10 +71,11 @@ export default function ChannelPage() {
 
     return () => {
       mounted = false;
-      controller.abort();
+      controller.abort(); 
     };
   }, [id, user]);
 
+  // Loading state
   if (loading)
     return (
       <div className="flex items-center justify-center h-screen">
@@ -74,6 +83,7 @@ export default function ChannelPage() {
       </div>
     );
 
+  // If no channel found
   if (!channel)
     return (
       <div className="flex flex-col items-center justify-center h-screen">
@@ -81,8 +91,8 @@ export default function ChannelPage() {
       </div>
     );
 
+  // Check if the channel belongs to the logged-in user
   const isLoggedUserChannel = user?.channelId === channel._id;
-
   const bannerFallbackUrl = channel
     ? `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
         isLoggedUserChannel ? user.username || user.name : channel.channelName
@@ -91,7 +101,7 @@ export default function ChannelPage() {
 
   return (
     <div className="container mx-auto p-4">
-      {/* Banner */}
+      {/* Channel Banner */}
       <div className="h-28 md:h-32 w-full mb-4 rounded-lg overflow-hidden">
         {channel.bannerUrl ? (
           <img
@@ -111,9 +121,8 @@ export default function ChannelPage() {
         )}
       </div>
 
-      {/* Channel Card */}
+      {/* Channel Info Card */}
       <div className="bg-gray-100 p-4 rounded-lg flex items-center gap-6 mb-6 shadow-md">
-        {/* Avatar */}
         <div className="relative">
           <button className="flex items-center gap-1">
             <img
@@ -128,7 +137,7 @@ export default function ChannelPage() {
           </button>
         </div>
 
-        {/* Channel Info */}
+        {/* Channel Details */}
         <div className="flex flex-col">
           <h1 className="text-3xl font-bold text-gray-800">
             {channel.channelName}

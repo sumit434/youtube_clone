@@ -11,13 +11,15 @@ export default function Navbar({ onToggle }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [hasChannel, setHasChannel] = useState(false); 
 
-   useEffect(() => {
+  // Sync query state with URL search parameters
+  useEffect(() => {
     const urlQuery = searchParams.get("query") || "";
     if (query !== urlQuery) {
       setQuery(urlQuery);
     }
   }, [searchParams, query]);
 
+  // Check if the logged-in user has a channel; update state accordingly
   useEffect(() => {
     if (user && user.channelId) {
       setHasChannel(true);
@@ -49,7 +51,7 @@ export default function Navbar({ onToggle }) {
     }
   }, [user, updateUser]);
 
-
+  // Update query state and URL as user types in the search input
   const handleInputChange = (e) => {
     const newQuery = e.target.value;
     setQuery(newQuery);
@@ -60,18 +62,21 @@ export default function Navbar({ onToggle }) {
     }
   };
 
+  // Handle form submit: navigate to search results page
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) navigate(`/?query=${encodeURIComponent(query)}`);
     else navigate("/");
   };
 
+  // Logout the user and close dropdown
   const handleLogout = () => {
     logout();
     navigate("/");
     setDropdownOpen(false);
   };
 
+  // Navigate to user's channel or channel creation page
   const handleProfileClick = () => {
     if (user?.channelId) {
       navigate(`/channel/${user.channelId}`);
@@ -125,129 +130,130 @@ export default function Navbar({ onToggle }) {
         </button>
       </form>
 
-     <div className="flex items-center gap-1">
-  {user ? (
-    <>
-      {hasChannel ? (
-        <button
-  onClick={() => navigate("/upload")}
-  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1 rounded-full shadow-md transition"
->
-  <Video size={20} />
-  <span>Upload</span>
-</button>
+      <div className="flex items-center gap-1">
+        {user ? (
+          <>
+            {/* Show Upload or Create Channel based on whether user has a channel */}
+            {hasChannel ? (
+              <button
+                onClick={() => navigate("/upload")}
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-3 py-1 rounded-full shadow-md transition"
+              >
+                <Video size={20} />
+                <span>Upload</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate("/channel/create")}
+                className="bg-blue-600 text-white px-3 py-1 rounded-full font-medium  hover:bg-blue-700 text-sm"
+              >
+                Create Channel
+              </button>
+            )}
 
-      ) : (
-        <button
-          onClick={() => navigate("/channel/create")}
-          className="bg-blue-600 text-white px-3 py-1 rounded-full font-medium  hover:bg-blue-700 text-sm"
-        >
-          Create Channel
-        </button>
-      )}
+            {/* Avatar + Dropdown menu */}
+            <div className="relative ml-2">
+              <button
+                onClick={() => setDropdownOpen((prev) => !prev)}
+                className="flex items-center gap-1"
+              >
+                {user.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="User Avatar"
+                    className="w-10.5 h-10.5 rounded-full"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm">
+                    {user.username?.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </button>
 
-      {/* Avatar + Dropdown */}
-      <div className="relative ml-2">
-        <button
-          onClick={() => setDropdownOpen((prev) => !prev)}
-          className="flex items-center gap-1"
-        >
-          {user.avatar ? (
-            <img
-              src={user.avatar}
-              alt="User Avatar"
-              className="w-10.5 h-10.5 rounded-full"
-            />
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-sm">
-              {user.username?.charAt(0).toUpperCase()}
-            </div>
-          )}
-        </button>
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white z-50">
+                  {/* User info inside dropdown */}
+                  <div className="flex items-center p-4 border-b border-gray-200">
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt="User Avatar"
+                        className="w-10 h-10 rounded-full mr-3"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center mr-3">
+                        <User size={24} />
+                      </div>
+                    )}
+                    <div>
+                      <div className="text-sm font-semibold text-gray-900">
+                        {user.name}
+                      </div>
+                      <div className="text-sm text-gray-500">{user.email}</div>
+                    </div>
+                  </div>
 
-        {dropdownOpen && (
-          <div className="absolute right-0 mt-2 w-64 rounded-md shadow-lg bg-white z-50">
-            <div className="flex items-center p-4 border-b border-gray-200">
-              {user.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt="User Avatar"
-                  className="w-10 h-10 rounded-full mr-3"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center mr-3">
-                  <User size={24} />
+                  <div className="py-1" role="menu" aria-orientation="vertical">
+                    <button
+                      onClick={handleProfileClick}
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <User size={18} className="mr-3" />
+                      My Channel
+                    </button>
+                    {/* Disabled links */}
+                    <Link
+                      to="#"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
+                    >
+                      YouTube Studio
+                    </Link>
+                    <Link
+                      to="#"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
+                    >
+                      Purchases and Membership
+                    </Link>
+                    <Link
+                      to="#"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
+                    >
+                      Language
+                    </Link>
+                    <Link
+                      to="#"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
+                    >
+                      Location
+                    </Link>
+                    <Link
+                      to="#"
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
+                    >
+                      <Settings size={18} className="mr-3" />
+                      Settings
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <LogOut size={18} className="mr-3" />
+                      Logout
+                    </button>
+                  </div>
                 </div>
               )}
-              <div>
-                <div className="text-sm font-semibold text-gray-900">
-                  {user.name}
-                </div>
-                <div className="text-sm text-gray-500">{user.email}</div>
-              </div>
             </div>
-
-            <div className="py-1" role="menu" aria-orientation="vertical">
-              <button
-                onClick={handleProfileClick}
-                className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                <User size={18} className="mr-3" />
-                My Channel
-              </button>
-              {/* Disabled links */}
-              <Link
-                to="#"
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
-              >
-                YouTube Studio
-              </Link>
-              <Link
-                to="#"
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
-              >
-                Purchases and Membership
-              </Link>
-              <Link
-                to="#"
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
-              >
-                Language
-              </Link>
-              <Link
-                to="#"
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
-              >
-                Location
-              </Link>
-              <Link
-                to="#"
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 opacity-50 cursor-not-allowed"
-              >
-                <Settings size={18} className="mr-3" />
-                Settings
-              </Link>
-              <button
-                onClick={handleLogout}
-                className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-              >
-                <LogOut size={18} className="mr-3" />
-                Logout
-              </button>
-            </div>
-          </div>
+          </>
+        ) : (
+          <button
+            onClick={() => navigate("/login")}
+            className="bg-red-600 text-white px-3 py-0.5 font-medium rounded-2xl hover:bg-red-800"
+          >
+            Sign In
+          </button>
         )}
       </div>
-    </>
-  ) : (
-    <button
-      onClick={() => navigate("/login")}
-      className="bg-red-600 text-white px-3 py-0.5 font-medium rounded-2xl hover:bg-red-800"
-    >
-      Sign In
-    </button>
-  )}
-</div>
     </header>
   );
 }

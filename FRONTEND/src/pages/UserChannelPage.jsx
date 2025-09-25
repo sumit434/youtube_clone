@@ -7,12 +7,14 @@ export default function UserChannelPage() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
 
-  const [form, setForm] = useState({ channelName: "", description: "" });
-  const [alertMessage, setAlertMessage] = useState("");
+  const [form, setForm] = useState({ channelName: "", description: "" }); 
+  const [alertMessage, setAlertMessage] = useState(""); 
 
+  // Handle input changes
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -22,10 +24,10 @@ export default function UserChannelPage() {
 
       const channel = response.data.channel;
       if (channel && updateUser) {
-        updateUser({ channelId: channel._id }); 
+        updateUser({ channelId: channel._id });
       }
 
-      navigate("/"); 
+      navigate(`/channel/${channel._id}`);
     } catch (error) {
       console.error(error);
       setAlertMessage(error.response?.data?.message || "Something went wrong");
@@ -36,6 +38,8 @@ export default function UserChannelPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="bg-white shadow-lg rounded-xl p-6 w-96">
         <h2 className="text-2xl font-bold mb-4 text-center">Create Your Channel</h2>
+
+        {/* Channel creation form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -60,6 +64,8 @@ export default function UserChannelPage() {
             Create Channel
           </button>
         </form>
+
+        {/* Display any error messages */}
         {alertMessage && (
           <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
             {alertMessage}

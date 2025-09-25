@@ -5,13 +5,14 @@ import api from "../utils/axios.js";
 import Comment from "../components/Comment.jsx";
 
 export default function CommentsSection() {
-  const { id: videoId } = useParams();
-  const { user } = useAuth();
+  const { id: videoId } = useParams(); 
+  const { user } = useAuth(); 
   const navigate = useNavigate();
 
-  const [comments, setComments] = useState([]);
-  const [newCommentText, setNewCommentText] = useState("");
+  const [comments, setComments] = useState([]); 
+  const [newCommentText, setNewCommentText] = useState(""); 
 
+  // Fetch comments when videoId changes
   useEffect(() => {
     api
       .get(`/comments/${videoId}`)
@@ -19,9 +20,10 @@ export default function CommentsSection() {
       .catch((err) => console.error("Failed to fetch comments:", err));
   }, [videoId]);
 
+  // Handle posting a new comment
   const handlePostComment = async (e) => {
     e.preventDefault();
-    if (!newCommentText.trim()) return;
+    if (!newCommentText.trim()) return; 
 
     try {
       const res = await api.post(`/comments/${videoId}`, {
@@ -29,14 +31,16 @@ export default function CommentsSection() {
       });
 
       if (res.data?.data) {
+        // Prepend new comment to the list
         setComments([res.data.data, ...comments]);
-        setNewCommentText("");
+        setNewCommentText(""); 
       }
     } catch (err) {
       console.error("Failed to post comment:", err);
     }
   };
 
+  // Redirect non-authenticated users to signup
   const handleAuthRedirect = (e) => {
     e.preventDefault();
     navigate("/signup"); 
@@ -47,35 +51,34 @@ export default function CommentsSection() {
       <h2 className="text-xl font-bold mb-4">Comments</h2>
 
       {/* Comment input form */}
-<form
-  onSubmit={user ? handlePostComment : handleAuthRedirect}
-  className="flex gap-4 items-center mb-6"
->
-  <input
-    type="text"
-    value={newCommentText}
-    onChange={(e) => setNewCommentText(e.target.value)}
-    placeholder={
-      user ? "Add a comment..." : "Sign in to leave a comment..."
-    }
-    className={`flex-1 p-2 rounded-full border ${
-      user
-        ? "border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        : "border-gray-200 focus:outline-none"
-    }`}
-  />
-  <button
-    type="submit"
-    className={`font-semibold py-2 px-6 rounded-full transition-colors ${
-      user
-        ? "bg-blue-600 text-white hover:bg-blue-700"
-        : "bg-gray-300 text-gray-600 hover:bg-gray-400"
-    }`}
-  >
-    Comment
-  </button>
-</form>
-
+      <form
+        onSubmit={user ? handlePostComment : handleAuthRedirect}
+        className="flex gap-4 items-center mb-6"
+      >
+        <input
+          type="text"
+          value={newCommentText}
+          onChange={(e) => setNewCommentText(e.target.value)}
+          placeholder={
+            user ? "Add a comment..." : "Sign in to leave a comment..."
+          }
+          className={`flex-1 p-2 rounded-full border ${
+            user
+              ? "border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              : "border-gray-200 focus:outline-none"
+          }`}
+        />
+        <button
+          type="submit"
+          className={`font-semibold py-2 px-6 rounded-full transition-colors ${
+            user
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-300 text-gray-600 hover:bg-gray-400"
+          }`}
+        >
+          Comment
+        </button>
+      </form>
 
       {/* Comment list */}
       <div className="flex flex-col">

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 
 function Sidebar({ open, onToggle }) {
+  // Sidebar width toggles based on `open` prop; hidden on small screens
   return (
     <aside
       className={`transition-all duration-300 ${
@@ -15,9 +16,10 @@ function Sidebar({ open, onToggle }) {
       } hidden sm:block overflow-y-auto h-screen sticky top-0 z-40`}
     >
       <div className="flex items-center p-3 border-b bg-neutral-100 border-gray-200">
-      
+        {/* Placeholder for logo or menu button */}
       </div>
 
+      {/* Navigation links grouped */}
       <SidebarLinks open={open} />
     </aside>
   );
@@ -26,6 +28,7 @@ function Sidebar({ open, onToggle }) {
 function SidebarLinks({ open }) {
   return (
     <>
+      {/* Main navigation */}
       <nav className="p-2 mt-6">
         <SidebarItem to="/" icon={<Home size={30} />} label="Home" open={open} />
         <SidebarItem to="/shorts" icon={<PlaySquare size={30} />} label="Shorts" open={open} />
@@ -34,6 +37,7 @@ function SidebarLinks({ open }) {
 
       <div className="border-t border-gray-200 my-2"></div>
 
+      {/* Secondary navigation */}
       <nav className="p-2">
         <SidebarItem to="/history" icon={<Clock size={30} />} label="History" open={open} />
       </nav>
@@ -42,6 +46,7 @@ function SidebarLinks({ open }) {
 }
 
 function SidebarItem({ to, icon, label, open }) {
+  // Each item shows icon always, and label only when sidebar is expanded
   return (
     <Link
       to={to}

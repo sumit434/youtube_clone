@@ -4,22 +4,22 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { Mail, Lock } from "lucide-react";
 
 export default function LoginPage () {
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [alert, setAlert] = useState(null);
+  const [formData, setFormData] = useState({ email: "", password: "" }); 
+  const [alert, setAlert] = useState(null); 
   const navigate = useNavigate();
-   const { user, login } = useAuth();
+  const { user, login } = useAuth(); 
 
-   
+  // Handle input field changes
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setAlert(null);
+    setAlert(null); 
     try {
       await login(formData.email, formData.password);
-      navigate("/");
+      navigate("/"); 
     } catch (error) {
       setAlert(error.response?.data?.error || "Login failed");
     }
@@ -29,6 +29,7 @@ export default function LoginPage () {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="bg-white p-8 rounded-lg shadow-lg w-96">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Log In</h2>
+        {/* Login form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
@@ -61,11 +62,13 @@ export default function LoginPage () {
             Log In
           </button>
         </form>
+        {/* Display login errors */}
         {alert && (
           <div className="mt-4 p-3 text-sm text-red-700 bg-red-100 rounded-md">
             {alert}
           </div>
         )}
+        {/* Link to signup page */}
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{" "}
           <Link to="/signup" className="text-red-600 hover:underline">

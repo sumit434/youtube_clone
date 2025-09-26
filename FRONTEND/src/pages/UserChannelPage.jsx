@@ -7,8 +7,14 @@ export default function UserChannelPage() {
   const navigate = useNavigate();
   const { user, updateUser } = useAuth();
 
-  const [form, setForm] = useState({ channelName: "", description: "" }); 
-  const [alertMessage, setAlertMessage] = useState(""); 
+  const [form, setForm] = useState({
+    channelName: "",
+    description: "",
+    photoUrl: "",
+    bannerUrl: "",
+  });
+
+  const [alertMessage, setAlertMessage] = useState("");
 
   // Handle input changes
   const handleChange = (e) =>
@@ -23,8 +29,14 @@ export default function UserChannelPage() {
       });
 
       const channel = response.data.channel;
+
       if (channel && updateUser) {
-        updateUser({ channelId: channel._id });
+        // Update user context with new channel info including avatar and banner
+        updateUser({
+          channelId: channel._id,
+          avatar: channel.photoUrl?.trim() || null,
+          banner: channel.bannerUrl?.trim() || null,
+        });
       }
 
       navigate(`/channel/${channel._id}`);
@@ -37,7 +49,9 @@ export default function UserChannelPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="bg-white shadow-lg rounded-xl p-6 w-96">
-        <h2 className="text-2xl font-bold mb-4 text-center">Create Your Channel</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Create Your Channel
+        </h2>
 
         {/* Channel creation form */}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,6 +68,22 @@ export default function UserChannelPage() {
             name="description"
             placeholder="Channel Description"
             value={form.description}
+            onChange={handleChange}
+            className="w-full border rounded-lg px-3 py-2"
+          />
+          <input
+            type="text"
+            name="photoUrl"
+            placeholder="Profile Picture URL"
+            value={form.photoUrl}
+            onChange={handleChange}
+            className="w-full border rounded-lg px-3 py-2"
+          />
+          <input
+            type="text"
+            name="bannerUrl"
+            placeholder="Banner URL"
+            value={form.bannerUrl}
             onChange={handleChange}
             className="w-full border rounded-lg px-3 py-2"
           />

@@ -5,45 +5,41 @@ import api from "../utils/axios.js";
 import Comment from "../components/Comment.jsx";
 
 export default function CommentsSection() {
-  const { id: videoId } = useParams(); 
-  const { user } = useAuth(); 
+  const { id: videoId } = useParams();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [comments, setComments] = useState([]); 
-  const [newCommentText, setNewCommentText] = useState(""); 
+  const [comments, setComments] = useState([]);
+  const [newCommentText, setNewCommentText] = useState("");
 
-  // Fetch comments when videoId changes
+  // Fetch comments
   useEffect(() => {
     api
       .get(`/comments/${videoId}`)
-      .then((res) => setComments(res.data.data || []))
+      .then((res) => setComments(res.data.data?.filter(Boolean) || []))
       .catch((err) => console.error("Failed to fetch comments:", err));
   }, [videoId]);
 
-  // Handle posting a new comment
+  // Post new comment
   const handlePostComment = async (e) => {
     e.preventDefault();
-    if (!newCommentText.trim()) return; 
+    if (!newCommentText.trim()) return;
 
     try {
-      const res = await api.post(`/comments/${videoId}`, {
-        text: newCommentText,
-      });
-
+      const res = await api.post(`/comments/${videoId}`, { text: newCommentText });
       if (res.data?.data) {
-        // Prepend new comment to the list
-        setComments([res.data.data, ...comments]);
-        setNewCommentText(""); 
+        setComments(prev => [res.data.data, ...prev]);
+        setNewCommentText("");
       }
     } catch (err) {
       console.error("Failed to post comment:", err);
     }
   };
 
-  // Redirect non-authenticated users to signup
+  // Redirect to signup if not logged in
   const handleAuthRedirect = (e) => {
     e.preventDefault();
-    navigate("/signup"); 
+    navigate("/signup");
   };
 
   return (
@@ -59,9 +55,7 @@ export default function CommentsSection() {
           type="text"
           value={newCommentText}
           onChange={(e) => setNewCommentText(e.target.value)}
-          placeholder={
-            user ? "Add a comment..." : "Sign in to leave a comment..."
-          }
+          placeholder={user ? "Add a comment..." : "Sign in to leave a comment..."}
           className={`flex-1 p-2 rounded-full border ${
             user
               ? "border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -84,7 +78,14 @@ export default function CommentsSection() {
       <div className="flex flex-col">
         {comments.length > 0 ? (
           comments.map((comment) => (
-            <Comment key={comment._id} comment={comment} />
+            <Comment
+              key={comment._id}
+              comment={comment}
+              user={user}
+              comments={comments}
+              setComments={setComments}
+              api={api}
+            />
           ))
         ) : (
           <p className="text-sm text-gray-500">No comments yet.</p>

@@ -27,74 +27,84 @@ export default function VideoPage() {
   const [dislikesCount, setDislikesCount] = useState(0);
   const [userReaction, setUserReaction] = useState(null);
 
-  useEffect(() => {
-    const fetchVideoAndRelated = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get(`/videos/${id}`);
-        const videoData = res.data?.data;
-        setCurrentVideo(videoData || null);
+useEffect(() => {
+  const fetchVideoAndRelated = async () => {
+    setLoading(true);
+    try {
+      // Fetch the video
+      const res = await api.get(`/videos/${id}`);
+      const videoData = res.data?.data;
+      setCurrentVideo(videoData || null);
 
-        if (videoData) {
-          // Likes/Dislikes count
-          try {
-            const countsRes = await api.get(
-              `/likes_dislikes/${videoData._id}/counts`
+      if (videoData?.channelId) {
+        // Fetch full channel for accurate subscribers
+        try {
+          const channelRes = await api.get(`/channels/${videoData.channelId}`);
+          const fullChannel = channelRes.data?.data || channelRes.data || null;
+          if (fullChannel) {
+            setSubscriberCount(fullChannel.subscribersCount || 0);
+
+            // Merge full channel info into currentVideo
+            setCurrentVideo((prev) =>
+              prev ? { ...prev, channel: fullChannel } : prev
             );
-            setLikesCount(countsRes.data?.data?.likes || 0);
-            setDislikesCount(countsRes.data?.data?.dislikes || 0);
-          } catch (err) {
-            console.warn("Failed to fetch reaction counts:", err);
           }
-
-          // User reaction
-          if (user) {
-            try {
-              const userReactionRes = await api.get(
-                `/likes_dislikes/${videoData._id}`
-              );
-              setUserReaction(userReactionRes.data?.data || null);
-            } catch (err) {
-              console.warn("Failed to fetch user reaction:", err);
-            }
-          }
-
-          // Related videos
-          if (videoData.channelId) {
-            try {
-              const channelRes = await api.get(
-                `/videos/${videoData.channelId}/videos`
-              );
-              const channelVideos = (channelRes.data?.data || []).filter(
-                (v) => v._id !== videoData._id
-              );
-
-              const allRes = await api.get(`/videos`);
-              const otherVideos = (allRes.data?.data || []).filter(
-                (v) => v.channelId !== videoData.channelId
-              );
-
-              const combined = [...channelVideos, ...otherVideos].slice(0, 10);
-              setRelatedVideos(combined);
-            } catch (err) {
-              console.warn("Failed to fetch related videos:", err);
-            }
-          }
-
-          setSubscriberCount(videoData.channel?.subscribers || null);
+        } catch (err) {
+          console.warn("Failed to fetch full channel info:", err);
         }
-      } catch (err) {
-        console.error("Error fetching video or related:", err);
-        setCurrentVideo(null);
-        setRelatedVideos([]);
-        setSubscriberCount(null);
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchVideoAndRelated();
-  }, [id, user]);
+        // Related videos
+        try {
+          const channelResVideos = await api.get(
+            `/videos/${videoData.channelId}/videos`
+          );
+          const channelVideos = (channelResVideos.data?.data || []).filter(
+            (v) => v._id !== videoData._id
+          );
+
+          const allRes = await api.get(`/videos`);
+          const otherVideos = (allRes.data?.data || []).filter(
+            (v) => v.channelId !== videoData.channelId
+          );
+
+          const combined = [...channelVideos, ...otherVideos].slice(0, 10);
+          setRelatedVideos(combined);
+        } catch (err) {
+          console.warn("Failed to fetch related videos:", err);
+        }
+      }
+
+      // Likes/dislikes counts
+      try {
+        const countsRes = await api.get(`/likes_dislikes/${videoData._id}/counts`);
+        setLikesCount(countsRes.data?.data?.likes || 0);
+        setDislikesCount(countsRes.data?.data?.dislikes || 0);
+      } catch (err) {
+        console.warn("Failed to fetch reaction counts:", err);
+      }
+
+      // User reaction
+      if (user) {
+        try {
+          const userReactionRes = await api.get(`/likes_dislikes/${videoData._id}`);
+          setUserReaction(userReactionRes.data?.data || null);
+        } catch (err) {
+          console.warn("Failed to fetch user reaction:", err);
+        }
+      }
+
+    } catch (err) {
+      console.error("Error fetching video or related:", err);
+      setCurrentVideo(null);
+      setRelatedVideos([]);
+      setSubscriberCount(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchVideoAndRelated();
+}, [id, user]);
 
 // Handling Like and dislike reaction
 const handleReaction = async (type) => {
@@ -154,22 +164,29 @@ const handleReaction = async (type) => {
       <div className="flex items-center justify-between">
     <div className="flex items-center gap-4">
       {/* Clickable Channel Info */}
-      <div
-        className="flex items-center gap-3 cursor-pointer"
-        onClick={() => navigate(`/channel/${currentVideo.channel?._id}`)}
-      >
-        <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-bold text-sm text-white">
-          {currentVideo.channel?.channelName?.charAt(0).toUpperCase() || "U"}
-        </div>
-        <div>
-          <p className="font-semibold text-base">
-            {currentVideo.channel?.channelName || "Unknown Channel"}
-          </p>
-          <p className="text-sm text-gray-500">
-            {(subscriberCount || 0).toLocaleString()} subscribers
-          </p>
-        </div>
+    <div
+      className="flex items-center gap-3 cursor-pointer"
+      onClick={() => navigate(`/channel/${currentVideo.channel?._id}`)}
+    >
+      <img
+        src={
+          currentVideo.channel?.photoUrl?.trim() ||
+          `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
+            currentVideo.channel?.channelName || "U"
+          )}&backgroundType=solid`
+        }
+        alt={currentVideo.channel?.channelName || "User Avatar"}
+        className="w-10 h-10 rounded-full object-cover"
+      />
+      <div>
+        <p className="font-semibold text-base">
+          {currentVideo.channel?.channelName || "Unknown Channel"}
+        </p>
+        <p className="text-sm text-gray-500">
+          {(subscriberCount || 0).toLocaleString()} subscribers
+        </p>
       </div>
+    </div>
 
       {/* Subscribe Button */}
       <button className="bg-red-600 text-white text-md font-semibold py-1 px-3 rounded-full hover:bg-red-700 transition-colors">

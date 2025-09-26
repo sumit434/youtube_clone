@@ -3,38 +3,41 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../utils/axios.js";
 import VideoCard from "../components/VideoCard.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
-import { Video } from "lucide-react"; 
+import { Video } from "lucide-react";
 
 export default function ChannelPage() {
   const { id } = useParams();
-  const { user } = useAuth(); 
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true); 
-  const [channel, setChannel] = useState(null); 
-  const [videos, setVideos] = useState([]); 
 
-  // Generate a fallback avatar if no photo exists
+  const [loading, setLoading] = useState(true);
+  const [channel, setChannel] = useState(null);
+  const [videos, setVideos] = useState([]);
+
+  // Generate fallback avatar if no photo exists
   const generateAvatar = (username) =>
     `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
       username
-    )}`;
+    )}&backgroundType=solid`;
 
-  // Fetch channel + videos data whenever channelId or user changes
   useEffect(() => {
-    let mounted = true; 
-    const controller = new AbortController(); 
+    let mounted = true;
+    const controller = new AbortController();
 
     async function fetchChannelData() {
       try {
         const channelIdToFetch = id || user?.channelId;
+
+        // Fetch channel
         const channelRes = await api.get(`/channels/${channelIdToFetch}`, {
           signal: controller.signal,
         });
-
         if (!mounted) return;
+
         const channelData = channelRes.data?.data || channelRes.data || null;
         setChannel(channelData);
 
+        // Fetch videos
         let videosRes;
         try {
           videosRes = await api.get(`/videos/${channelIdToFetch}/videos`, {
@@ -66,7 +69,7 @@ export default function ChannelPage() {
 
     return () => {
       mounted = false;
-      controller.abort(); 
+      controller.abort();
     };
   }, [id, user]);
 
@@ -85,54 +88,55 @@ export default function ChannelPage() {
     );
 
   const isLoggedUserChannel = user?.channelId === channel._id;
-  const bannerFallbackUrl = channel
-    ? `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
-        isLoggedUserChannel ? user.username || user.name : channel.channelName
-      )}&backgroundType=solid&chars=0`
-    : "";
 
- return (
+  // Banner: use user.banner if exists, else channel.bannerUrl if not empty, else fallback
+  const bannerUrl =
+    (isLoggedUserChannel
+      ? user?.banner || (channel.bannerUrl?.trim() ? channel.bannerUrl : null)
+      : channel.bannerUrl?.trim() ? channel.bannerUrl : null) ||
+    `https://api.dicebear.com/6.x/initials/svg?seed=${encodeURIComponent(
+      isLoggedUserChannel ? user.username || user.name : channel.channelName
+    )}&backgroundType=solid&chars=0`;
+    
+// Avatar: prioritize channel.photoUrl, fallback to user.avatar, then fallback
+const avatarUrl =
+  channel.photoUrl?.trim() ||
+  (isLoggedUserChannel ? user?.avatar?.trim() : null) ||
+  generateAvatar(channel.channelName);
+
+  return (
     <div className="container mx-auto p-4 mt-8">
       {/* Channel Banner */}
-      <div className="h-28 md:h-32 w-full mb-4 rounded-lg overflow-hidden">
-        {channel.bannerUrl ? (
-          <img
-            src={channel.bannerUrl}
-            alt="Channel Banner"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div
-            className="w-full h-full rounded-lg opacity-35"
-            style={{
-              backgroundImage: `url("${bannerFallbackUrl}")`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          />
-        )}
+      <div className="h-32 md:h-40 w-full mb-4 rounded-lg overflow-hidden">
+        <img
+          src={bannerUrl}
+          alt="Channel Banner"
+          className="w-full h-full object-cover"
+        />
       </div>
+
       {/* Channel Info Card */}
       <div className="bg-gray-100 pb-2 rounded-lg flex items-center justify-between mb-6 px-4 py-3">
         <div className="flex items-center gap-4">
           <img
-            src={
-              isLoggedUserChannel
-                ? user?.avatar
-                : channel.photoUrl || generateAvatar(channel.channelName)
-            }
+            src={avatarUrl}
             alt={channel.channelName}
-            className="w-12 h-12 rounded-full"
+            className="w-21 h-21 rounded-full"
+            onError={(e) => {
+              e.currentTarget.src = generateAvatar(channel.channelName);
+            }}
           />
           <div className="flex flex-col">
-            <h1 className="text-2xl font-bold text-gray-800">{channel.channelName}</h1>
+            <h1 className="text-2xl font-bold text-gray-800">
+              {channel.channelName}
+            </h1>
             <p className="text-gray-600">{channel.description}</p>
             <span className="text-gray-400 text-sm">
               {channel.subscribersCount || 0} Subscribers • {videos.length} Videos
             </span>
           </div>
         </div>
-        {/* Upload Button: only visible to channel owner */}
+
         {isLoggedUserChannel && (
           <div className="flex flex-col gap-2">
             <button
@@ -145,6 +149,7 @@ export default function ChannelPage() {
           </div>
         )}
       </div>
+
       {/* Videos Section */}
       <h2 className="text-2xl font-bold mb-4 text-gray-800">Videos</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

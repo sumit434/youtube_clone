@@ -5,6 +5,7 @@ const advancedResults = (
 ) => async (req, res, next) => {
   let query
 
+  // Adjust query based on visibility rules
   if (visibility.status == 'private') {
     req.query.userId = req.user._id
 
@@ -28,7 +29,7 @@ const advancedResults = (
 
   if (req.query.select) {
     const fields = req.query.select.split(',').join(' ')
-    query = query.select(fields)
+    query = query.select(fields) // Select specific fields if provided
   }
 
   if (req.query.sort) {
@@ -48,12 +49,12 @@ const advancedResults = (
   const totalPage = Math.ceil(total / limit)
 
   if (parseInt(req.query.limit) !== 0) {
-    query = query.skip(startIndex).limit(limit)
+    query = query.skip(startIndex).limit(limit) // Apply pagination
   }
 
   if (populates) {
     populates.forEach((populate) => {
-      query = query.populate(populate)
+      query = query.populate(populate) // Populate referenced fields
     })
   }
 
@@ -93,4 +94,4 @@ const advancedResults = (
   next()
 }
 
-export default advancedResults;
+export default advancedResults

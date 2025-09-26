@@ -2,7 +2,6 @@ import ErrorResponse from "../utils/errorResponse.js";
 import asyncHandler from "../middleware/async.js";
 import Category from "../models/Categories.js";
 
-
 // @desc    Get categories
 // @route   GET /api/v1/categories
 // @access  Private/Admin

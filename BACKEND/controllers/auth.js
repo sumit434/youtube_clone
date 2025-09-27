@@ -20,7 +20,7 @@ export const register = asyncHandler(async (req, res, next) => {
   res.status(201).json({
     success: true,
     token: user.getSignedJwtToken(),
-    user: { id: user._id, name: user.name, email: user.email, channelId: user.channelId },
+    user: { id: user._id, name: user.name, email: user.email, channelId: user.channelId,},
   });
 });
 
@@ -44,14 +44,28 @@ export const login = asyncHandler(async (req, res, next) => {
 });
 
 export const getMe = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.user.id);
- 
+  // Fetch user and populate channel info (photoUrl and bannerUrl)
+  const user = await User.findById(req.user.id).populate({
+    path: "channelId",
+    select: "photoUrl bannerUrl", // include profile pic and banner
+  });
+
+  if (!user) {
+    return next(new ErrorResponse("No user found with this id", 404));
+  }
+
   res.status(200).json({
     success: true,
-    user: { id: user._id, name: user.name, email: user.email, channelId: user.channelId },
+    user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      channelId: user.channelId?._id || null,
+      avatar: user.channelId?.photoUrl || null, 
+      banner: user.channelId?.bannerUrl || null, 
+    },
   });
 });
-
 // @desc      Get current logged-in user
 // @route     GET /api/v1/auth/me
 // @access    Private
@@ -73,6 +87,7 @@ const sendTokenResponse = (user, statusCode, res) => {
       username: user.username,
       email: user.email,
       channelId: user.channelId, 
+      avatar: user.avatar,
     },
   });
 };

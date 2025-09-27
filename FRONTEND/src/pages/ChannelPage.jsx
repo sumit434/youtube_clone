@@ -121,7 +121,7 @@ const avatarUrl =
           <img
             src={avatarUrl}
             alt={channel.channelName}
-            className="w-21 h-21 rounded-full"
+            className="w-21 h-21 rounded-full object-cover"
             onError={(e) => {
               e.currentTarget.src = generateAvatar(channel.channelName);
             }}
